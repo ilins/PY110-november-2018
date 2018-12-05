@@ -19,8 +19,18 @@ def decorator(func):
     This one is for debug purpose
     :return:
     """
-    def wrapper(arg):
-        func(arg)
+    def wrapper(*args, **kwargs):
+        template = 'test'
+        if kwargs:
+            for i in kwargs.values():
+                if template == i:
+                    return f"Вызов функции с параметрами: {kwargs}. Имя вызванной функции: {func.__name__}"
+        elif args:
+            if template in args:
+                return f"Вызов функции с параметрами: {args}. Имя вызванной функции: {func.__name__}"
+        else:
+            res = func(*args, **kwargs)
+            return res
     return wrapper
 
 
@@ -34,7 +44,7 @@ def address_json_file(file=""):
     a = addr['country']
     b = addr['city']
     c = addr['street']
-    return address(a, b, c)
+    return a, b, c
 
 
 def address_json(addr_string):
@@ -42,22 +52,33 @@ def address_json(addr_string):
     a = addr['country']
     b = addr['city']
     c = addr['street']
-    return address(a, b, c)
+    return a, b, c
 
 
-def address(country, city, street):
+@decorator
+def address(nfile="", nstring=""):
     """
-    This func return address
-    :param country: country
-    :param city: city
-    :param street: street
-    :return: Full address that passed on delivery service
+    This func generates addresses
+    :param nfile: input file
+    :param nstring: input string
+    :return: addresses
     """
+    street = []
+    if nstring:
+        data = address_json(nstring)
+        country = data[0]
+        city = data[1]
+        street = data[-1]
+    if nfile:
+        data = address_json_file(nfile)
+        country = data[0]
+        city = data[1]
+        street = data[-1]
     while True:
         for i in street:
             dom = rnd.randint(1, 20)
             kv = rnd.randint(1, 20)
-            ac = re.search(r"^(?:[а-я(?: \-)?А-Я]+)$", i)
+            ac = re.search(r"^(?:[а-я(?: \-)А-Я]+)$", i)
             if ac:
                 yield print(f"Your destination address is: {country}, {city}, {i}, dom {dom}, kvartira {kv}")
             else:
@@ -69,12 +90,17 @@ if __name__ == '__main__':
     # g = address_json('{"country": "Россия", "city": "Санкт-Петербург", "street": '
     #                  '["Вавиловых", "Энергетиков", "Чекистов"]}')
     # g = address('Россия', 'Санкт-Петербург', ["Вавиловых", "Энергетиков", "Чекистов"])
-    # g = address(file='D:\\Serega\\!own\\PyCharm_profile\\ISAproj\\PY110-november-2018\\addr.txt')
-    g = address_json_file('addr.txt')
-    next(g)
-    next(g)
-    next(g)
-    next(g)
-    next(g)
-    next(g)
-    next(g)
+    # g = address(nfile='addr.txt')
+    # g = address(nstring='{"country": "Россия", "city": "Санкт-Петербург", "street":'
+    #                     '["Вавиловых", "Энергетиков", "Чекистов"]}')
+    # g = address(nstring='test')
+    g = address(nfile='test')
+    print(g)
+    # g = address_json_file('addr.txt')
+    # next(g)
+    # next(g)
+    # next(g)
+    # next(g)
+    # next(g)
+    # next(g)
+    # next(g)
